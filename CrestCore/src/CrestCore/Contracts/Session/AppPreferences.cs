@@ -10,8 +10,8 @@ namespace CrestCore.Contracts;
 /// View focus follows the pointer, whether local pages open with the developer
 /// toolbar, whether holding a Most Recent Tab shortcut shows the recent tabs,
 /// where among the open tabs a new tab opens and whether one opened from a tab
-/// in a folder opens in that folder instead, and how the command palette ranks
-/// and arranges what it offers. Translation rules are in
+/// in a folder opens in that folder instead, whether ⌘Q asks before quitting,
+/// and how the command palette ranks and arranges what it offers. Translation rules are in
 /// ordinal order of their source language. They stay on this device and never
 /// become sync records.
 /// </summary>
@@ -19,7 +19,7 @@ public sealed record AppPreferences(StartupBehavior Startup, bool OffersTranslat
     IReadOnlyList<TranslationRule> TranslationRules, bool ChecksSpelling, bool AutomaticallyEntersPictureInPicture,
     SavedTabClosePolicy PinnedTabClose, SavedTabClosePolicy SavedTabClose, bool SavedTabFaviconReturnsToSavedUrl,
     bool UnloadedSavedTabsStay, bool SplitFocusFollowsMouse, bool AutomaticallyShowsDeveloperToolbar, bool ShowsRecentTabs,
-    NewTabPosition NewTabPosition, bool NewTabsJoinFolder,
+    NewTabPosition NewTabPosition, bool NewTabsJoinFolder, bool AsksBeforeQuitting,
     PalettePreferences Palette) {
     #region Static Variables
 
@@ -31,7 +31,7 @@ public sealed record AppPreferences(StartupBehavior Startup, bool OffersTranslat
         SavedTabFaviconReturnsToSavedUrl: false, UnloadedSavedTabsStay: true,
         SplitFocusFollowsMouse: false,
         AutomaticallyShowsDeveloperToolbar: true, ShowsRecentTabs: true, NewTabPosition.Top, NewTabsJoinFolder: false,
-        PalettePreferences.Default);
+        AsksBeforeQuitting: true, PalettePreferences.Default);
 
     #endregion
 
@@ -72,11 +72,12 @@ public sealed record AppPreferences(StartupBehavior Startup, bool OffersTranslat
         && ShowsRecentTabs == other.ShowsRecentTabs
         && NewTabPosition == other.NewTabPosition
         && NewTabsJoinFolder == other.NewTabsJoinFolder
+        && AsksBeforeQuitting == other.AsksBeforeQuitting
         && Palette.Equals(other.Palette);
 
     public override int GetHashCode() => HashCode.Combine(Startup, OffersTranslation, AutomaticallyTranslates,
         TranslationRules.Count, ChecksSpelling, AutomaticallyEntersPictureInPicture,
-        HashCode.Combine(PinnedTabClose, SavedTabClose),
+        HashCode.Combine(PinnedTabClose, SavedTabClose, AsksBeforeQuitting),
         HashCode.Combine(SavedTabFaviconReturnsToSavedUrl, UnloadedSavedTabsStay, SplitFocusFollowsMouse,
             AutomaticallyShowsDeveloperToolbar, ShowsRecentTabs, NewTabPosition, NewTabsJoinFolder, Palette));
 

@@ -1150,6 +1150,7 @@ struct AppPreferences: Equatable, Sendable {
         showsRecentTabs: true,
         newTabPosition: NewTabPosition.top,
         newTabsJoinFolder: false,
+        asksBeforeQuitting: true,
         palette: PalettePreferences(
             layout: PaletteLayout.sections,
             sources: [
@@ -1191,6 +1192,7 @@ struct AppPreferences: Equatable, Sendable {
     var showsRecentTabs: Bool
     var newTabPosition: NewTabPosition
     var newTabsJoinFolder: Bool
+    var asksBeforeQuitting: Bool
     var palette: PalettePreferences
 }
 

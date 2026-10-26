@@ -5953,6 +5953,10 @@
     "full-screen-window-border": {
       "category": "new",
       "message": "A full-screen window can give its pages their own border, or none, in Settings → Appearance → Window, while windows keep theirs."
+    },
+    "ask-before-quitting-with-command-q": {
+      "category": "new",
+      "message": "Crest can ask before quitting with Command-Q, so closing a tab never quits by accident."
     }
   }
 }

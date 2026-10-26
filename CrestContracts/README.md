@@ -245,7 +245,8 @@ The persistent session's `appPreferences` record holds the app-wide behavior
 preferences (`startupBehavior`, `offersTranslation`, `automaticallyTranslates`,
 `translationRules`, `checksSpelling`, `automaticallyEntersPictureInPicture`,
 `pinnedTabsAfterClosing`, `savedTabsAfterClosing`, `savedTabFaviconReturnsToSavedURL`,
-`splitFocusFollowsMouse`, `automaticallyShowsDeveloperToolbar`, `showsRecentTabs`), using the raw
+`splitFocusFollowsMouse`, `automaticallyShowsDeveloperToolbar`, `showsRecentTabs`,
+`asksBeforeQuitting`), using the raw
 values the native settings stored. A record that holds only the older shared
 `savedTabClosePolicy` gives its choice to both pinned and saved tabs.
 `SetAppPreferences` sets the record, `SetTranslationRule` edits one source

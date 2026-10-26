@@ -757,6 +757,7 @@
     "newTabsJoinFolder" : true,
     "pinnedTabsAfterClosing" : "resumeLastLocation",
     "savedTabsAfterClosing" : "returnToSavedURL",
+    "asksBeforeQuitting" : false,
     "translationRules" : {
       "sources" : {
         "fr" : {
