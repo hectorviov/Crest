@@ -18,6 +18,10 @@ enum BrowserAppearanceSetting: Hashable, Sendable, CaseIterable {
     case sidebarRevealDelay
     case sidebarSlideDuration
     case fullScreenSidebarReveal
+    /// Whether a full-screen window keeps the window's page border.
+    case fullScreenMatchesBorder
+    /// The page border a full-screen window uses when it has its own.
+    case fullScreenBorder
     case defaultPageZoom
     case cornerRadius
     case tabScale
@@ -60,7 +64,8 @@ enum BrowserAppearanceSetting: Hashable, Sendable, CaseIterable {
     /// The rows the page shows; More Customization holds the rest.
     static let onPage: Set<BrowserAppearanceSetting> = [
         .sidebarOnRight, .appearanceMode, .followSpaceAccent, .spacePageMotion, .sidebarRevealDelay,
-        .sidebarSlideDuration, .fullScreenSidebarReveal, .defaultPageZoom, .cornerRadius, .tabScale, .sidebarSpacing,
+        .sidebarSlideDuration, .fullScreenSidebarReveal, .fullScreenMatchesBorder, .fullScreenBorder, .defaultPageZoom,
+        .cornerRadius, .tabScale, .sidebarSpacing,
         .pinLayout, .websitePinColors, .dimUnloadedTabs, .tabStatus, .addressDisplay, .commandPaletteAccent,
         .copyURLButton, .superCopy,
         .folderIconOnly, .folderTabCounts, .groupTabCounts, .appIcon, .tabHoverPreview, .folderHoverPreview,

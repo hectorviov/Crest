@@ -6983,6 +6983,9 @@
     "Full URL" : {
 
     },
+    "Full-screen border" : {
+
+    },
     "Games" : {
       "localizations" : {
         "ar" : {
@@ -12253,6 +12256,9 @@
           }
         }
       }
+    },
+    "Same border in full screen" : {
+
     },
     "Sample page" : {
 

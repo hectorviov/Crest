@@ -83,6 +83,7 @@ struct BrowserSplitColumnsView<Member: Identifiable, Content: View, Panel: View>
     @ViewBuilder let panelContent: Panel
 
     @Environment(\.browserWindowCornerRadius) private var windowCornerRadius
+    @Environment(\.browserWindowIsFullScreen) private var isWindowFullScreen
     @Environment(\.browserSplitUsesBorderlessFrame) private var borderless
     @Environment(\.browserSplitLoneCardTopSection) private var loneCardTopSection
     @Environment(\.browserSplitInterCardGap) private var interCardGap
@@ -91,7 +92,9 @@ struct BrowserSplitColumnsView<Member: Identifiable, Content: View, Panel: View>
     @State private var panelWidthTransaction = BrowserSplitPanelWidthTransaction()
     @State private var cardIdentities = BrowserSplitCardIdentities()
 
-    private var appearance: BrowserChromeAppearance { .device(windowCornerRadius: windowCornerRadius) }
+    private var appearance: BrowserChromeAppearance {
+        .device(windowCornerRadius: windowCornerRadius, isFullScreen: isWindowFullScreen)
+    }
 
     var body: some View {
         let cards = cardIdentities.cards(for: members.map(\.id))

@@ -5949,6 +5949,10 @@
     "browser-import-http-passwords": {
       "category": "fixed",
       "message": "Importing another browser's passwords brings those for sites without HTTPS too, and setup says Crest won't fill them in, instead of leaving them out without a word."
+    },
+    "full-screen-window-border": {
+      "category": "new",
+      "message": "A full-screen window can give its pages their own border, or none, in Settings → Appearance → Window, while windows keep theirs."
     }
   }
 }
