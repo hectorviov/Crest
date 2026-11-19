@@ -7,8 +7,10 @@ namespace CrestCore.Contracts;
 /// a saved or pinned tab keeps its place and only puts its page away, back at
 /// its saved address when the app's preferences say so for its section. A window that showed
 /// the tab shows `ReturnTabId` next while the Space holds it, as a tab going
-/// back past its first page returns to the tab that opened it, and otherwise
-/// returns to the tab it showed before. Refused with `LastStartPage` for the
+/// back past its first page returns to the tab that opened it. Otherwise a
+/// tab another tab opened gives way to the nearest tab that same tab opened,
+/// below it first, then to the tab that opened it, and any other tab
+/// returns to the tab the window showed before. Refused with `LastStartPage` for the
 /// Start Page when it is its Space's only tab, which leaves only the window
 /// to close.
 public sealed record CloseTab(Guid WorkspaceId, Guid WindowId, Guid SpaceId, Guid TabId, Guid? ReturnTabId = null)
@@ -35,7 +37,7 @@ public sealed record CloseTab(Guid WorkspaceId, Guid WindowId, Guid SpaceId, Gui
         SessionTabEvents? events = null;
         if (action.KeepsTab) {
             var group = tab.SplitGroupId;
-            var fallback = Fallback(followUp, space.Id, space.Tabs
+            var fallback = Fallback(followUp, space, turn.Pages, space.Tabs
                 .Where(candidate => candidate.Id != tab.Id && (group is null || candidate.SplitGroupId != group))
                 .Select(candidate => candidate.Id).ToHashSet());
             var returns = workspace.ClosePolicy(turn.Basis, tab.Placement) == SavedTabClosePolicy.ReturnToSavedUrl
@@ -47,7 +49,7 @@ public sealed record CloseTab(Guid WorkspaceId, Guid WindowId, Guid SpaceId, Gui
                 SavedImages = restoresImage ? [new(tab.Id, TabSavedImageChange.Restore, tab.State.SavedFaviconUrl)] : null
             };
         } else {
-            var fallback = Fallback(followUp, space.Id, space.Tabs.Select(candidate => candidate.Id).ToHashSet());
+            var fallback = Fallback(followUp, space, turn.Pages, space.Tabs.Select(candidate => candidate.Id).ToHashSet());
             selected = edited.DismissTabs([tab.Id], shown, fallback, turn.Now, deleting: false, ensureSelection: false,
                 resetArchivePlacement: false);
             edited.PruneSplitMetadata();
@@ -57,14 +59,30 @@ public sealed record CloseTab(Guid WorkspaceId, Guid WindowId, Guid SpaceId, Gui
     }
 
     /// The tab a window that showed the closed tab shows next among
-    /// `available`: `ReturnTabId` when it is one, or else the one the window
-    /// showed before. None for a window that did not show it.
-    private Guid? Fallback(WindowFollowUp followUp, Guid spaceId, IReadOnlySet<Guid> available) {
-        var before = followUp.FallbackAfterDismissing(spaceId, TabId, available);
-        return followUp.Window?.Tab(spaceId) == TabId && ReturnTabId is { } returning && returning != TabId
-            && available.Contains(returning)
-                ? returning
-                : before;
+    /// `available`: `ReturnTabId` when it is one; else, for a tab another tab
+    /// opened, the nearest tab in `space` that same tab opened, looking below
+    /// first, or the tab that opened it; else the one the window showed
+    /// before. None for a window that did not show it.
+    private Guid? Fallback(WindowFollowUp followUp, SpaceState space, Pages? pages, IReadOnlySet<Guid> available) {
+        var before = followUp.FallbackAfterDismissing(space.Id, TabId, available);
+        if (followUp.Window?.Tab(space.Id) != TabId) return before;
+        if (ReturnTabId is { } returning && returning != TabId && available.Contains(returning)) return returning;
+        return Sibling(space, pages, available) ?? before;
+    }
+
+    /// The tab a link run continues with once the closed tab goes: the nearest
+    /// one in `available` that the closed tab's opener also opened, below it
+    /// first and then above, or else the opener itself.
+    private Guid? Sibling(SpaceState space, Pages? pages, IReadOnlySet<Guid> available) {
+        if (pages?.OpenerTab(WorkspaceId, TabId) is not { } opener || opener == TabId) return null;
+        var order = space.Tabs.Select((tab, index) => (tab.Id, Index: index)).ToList();
+        int closed = order.FindIndex(entry => entry.Id == TabId);
+        var siblings = order
+            .Where(entry => entry.Id != TabId && available.Contains(entry.Id) && pages.OpenerTab(WorkspaceId, entry.Id) == opener)
+            .ToList();
+        var below = siblings.Where(entry => entry.Index > closed).Select(entry => (Guid?)entry.Id).FirstOrDefault();
+        var above = siblings.Where(entry => entry.Index < closed).Select(entry => (Guid?)entry.Id).LastOrDefault();
+        return below ?? above ?? (available.Contains(opener) ? opener : null);
     }
 
     #endregion

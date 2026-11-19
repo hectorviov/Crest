@@ -281,6 +281,13 @@ internal sealed class Pages(Device device, Engines engines, IClock clock, IIdSou
         return elsewhere;
     }
 
+    /// The tab that opened `tabId` of a workspace: its page's opener, or the
+    /// one the history its last page kept remembers. None for a tab no tab
+    /// opened, or whose opener its saving or pinning forgot.
+    internal Guid? OpenerTab(Guid workspaceId, Guid tabId) =>
+        open.Values.FirstOrDefault(page => page.WorkspaceId == workspaceId && page.TabId == tabId)?.OpenerTabId
+        ?? (histories.TryGetValue((workspaceId, tabId), out var kept) ? kept.OpenerTabId : null);
+
     #endregion
 
     #region Actions - Reports

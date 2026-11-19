@@ -67,6 +67,34 @@ public sealed partial class BrowserContractsTests {
     }
 
     [Fact]
+    public void ClosingATabALinkOpenedShowsTheNextTabOfItsRunAndThenItsOpener() {
+        var session = TwoSpaceSession();
+        var (space, profile) = (SpaceId(session["spaces"]![0]!), ProfileId(session["spaces"]![0]!));
+        var (app, engine, _, workspace, window) = PageHost(session);
+        using var disposal = app;
+        var (sourceTab, source) = LiveTab(app, engine, workspace, window, space);
+        Guid Offer(string url) {
+            app.Report(engine, new PageOffered(Guid.NewGuid(), profile, source, window, SpaceId: null, url, Foreground: false));
+            return Assert.Single(app.Drain().OfType<OfferedPageAdopted>()).TabId;
+        }
+
+        // Three links opened in the background each land just after their
+        // source, the newest first.
+        var first = Offer("https://first.example/");
+        var second = Offer("https://second.example/");
+        var third = Offer("https://third.example/");
+        int at = CurrentTabs(app, workspace, space).FindIndex(tab => tab.Id == sourceTab);
+        Assert.Equal([third, second, first], CurrentTabs(app, workspace, space).Skip(at + 1).Take(3).Select(tab => tab.Id));
+
+        // Closing the shown one moves along the run before going back to the
+        // source, although the window last showed the source.
+        app.Send(new ShowTab(window, space, third));
+        Assert.Equal(second, ShownTab(app.Send(new CloseTab(workspace, window, space, third)), window, space));
+        Assert.Equal(first, ShownTab(app.Send(new CloseTab(workspace, window, space, second)), window, space));
+        Assert.Equal(sourceTab, ShownTab(app.Send(new CloseTab(workspace, window, space, first)), window, space));
+    }
+
+    [Fact]
     public void AStagedLinkLoadsOnlyInANewPageOfItsSourcesEngineAndProfile() {
         var session = TwoSpaceSession();
         var (first, second) = (SpaceId(session["spaces"]![0]!), SpaceId(session["spaces"]![1]!));
